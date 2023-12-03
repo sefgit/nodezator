@@ -1,6 +1,7 @@
 """TextViewer class extension with routine operations."""
 
 ### standard library import
+import asyncio
 from math import inf as INFINITY
 
 
@@ -36,7 +37,7 @@ from pygame.locals import (
 
 ### local imports
 
-from ...pygamesetup import SERVICES_NS, SCREEN_RECT, blit_on_screen
+from ...pygamesetup import SERVICES_NS, SCREEN_RECT, blit_on_screen, set_modal
 
 from ...surfsman.draw import draw_border
 from ...surfsman.cache import UNHIGHLIGHT_SURF_MAP
@@ -74,7 +75,7 @@ class Operations(Object2D):
     TextViewer class.
     """
 
-    def run(self):
+    async def run_loop(self):
         """Define and enter text viewer loop."""
         ### blit a semitransparent surface to in the canvas
         ### to increase constrast between the dialog and
@@ -86,7 +87,9 @@ class Operations(Object2D):
 
         self.running = True
 
+        set_modal(True)
         while self.running:
+            await asyncio.sleep(0)        
 
             ### perform various checkups for this frame;
             ###
@@ -96,7 +99,6 @@ class Operations(Object2D):
             self.handle_input()
 
             self.draw()
-
         ### blit semitransparent obj
 
         ## over self.rect
@@ -119,7 +121,11 @@ class Operations(Object2D):
 
         ### free memory from objects you won't use anymore
         self.free_up_memory()
+        set_modal(False)
 
+    def run(self):
+        asyncio.get_running_loop().create_task(self.run_loop())
+        
     def handle_events(self):
         """Retrieve and respond to events."""
         for event in SERVICES_NS.get_events():

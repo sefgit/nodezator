@@ -18,11 +18,7 @@ from ....fileman.main import select_paths
 class ImportExportOperations:
     """Operations to import/export colors."""
 
-    def import_colors(self):
-        """Import colors from python literals in path(s)."""
-
-        ### retrieve path(s) from file browser
-        paths = select_paths(caption="Select path(s)")
+    def import_colors_callback(self, paths):
 
         ### if a path or list of paths was not returned,
         ### just exit the method by returning
@@ -58,12 +54,17 @@ class ImportExportOperations:
             ### set the colors into the colors panel
             self.set_colors(colors)
 
-    def export_colors(self):
-        """Export colors as a python literal."""
+    
+    def import_colors(self):
+        """Import colors from python literals in path(s)."""
 
         ### retrieve path(s) from file browser
+        select_paths(
+            caption="Select path(s)",
+            callback = self.import_colors_callback,
+        )
 
-        path = select_paths(caption=("Provide a single path wherein to save" " colors"))
+    def export_colors_callback(self, path):
 
         ### if a path or list of paths was not returned,
         ### just exit the method by returning
@@ -97,3 +98,13 @@ class ImportExportOperations:
                 f"error while saving colors: {str(err)}",
                 level_name="error",
             )
+    
+    def export_colors(self):
+        """Export colors as a python literal."""
+
+        ### retrieve path(s) from file browser
+
+        select_paths(
+            caption=("Provide a single path wherein to save" " colors"),
+            callback = self.export_colors_callback,
+        )

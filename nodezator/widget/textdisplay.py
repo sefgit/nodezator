@@ -648,6 +648,13 @@ class TextDisplay(Object2D):
 
     reset_font_path = partialmethod(reset_style, "font_path")
 
+    def edit_value_callback(self, text):
+        ### if there is an edited text (it is not None)
+        ### and it is different from the current value,
+        ### set such text as the new value
+        if text is not None and text != self.value:
+            self.set(text)
+    
     def edit_value(self):
         """Edit value of widget on the text editor."""
         ### retrieve edited text: this triggers the
@@ -656,19 +663,14 @@ class TextDisplay(Object2D):
         ### the text (or None, if the user decides to
         ### cancel the operation)
 
-        text = edit_text(
+        edit_text(
             text=self.value,
             font_path=self.font_path,
             syntax_highlighting=self.syntax_highlighting,
             validation_command=self.validation_command,
+            callback = self.edit_value_callback,
         )
 
-        ### if there is an edited text (it is not None)
-        ### and it is different from the current value,
-        ### set such text as the new value
-
-        if text is not None and text != self.value:
-            self.set(text)
 
     def get_expected_type(self):
         return str

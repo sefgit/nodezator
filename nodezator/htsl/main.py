@@ -205,7 +205,7 @@ class HTSLBrowser(
         if hasattr(self, "running") and self.running:
             APP_REFS.draw_after_window_resize_setups = self.draw_once
 
-    def open_htsl_link(self, link):
+    def open_htsl_link(self, link, callback = None):
         """Create a htsl page from existing htsl file.
 
         The file is found with the given file name.
@@ -233,18 +233,24 @@ class HTSLBrowser(
             )
 
         ### show htsl page
-        self.show_htsl_page(optional_id)
+        self.show_htsl_page(optional_id, callback = callback)
 
-    def create_and_show_htsl_page(self, htsl_element):
+    def create_and_show_htsl_page(self, htsl_element, callback = None):
 
         self.create_and_set_htsl_objects(htsl_element)
-        self.show_htsl_page()
+        self.show_htsl_page(callback = callback)
 
-    def show_htsl_page(self, optional_id=""):
+    def show_htsl_page_callback(self):
+        ### free up memory from rendered objects
+        self.free_up_memory()
+        if self.callback is not None:
+            self.callback()
+        
+    def show_htsl_page(self, optional_id="", callback = None):
 
+        self.callback = callback
         ### define whether horizontal and vertical
         ### scrolling are enabled
-
         available_width, available_height = self.content_area_obj.rect.size
 
         page_width, page_height = self.objs.rect.size
@@ -281,10 +287,7 @@ class HTSLBrowser(
         self.draw_once()
 
         ### loop
-        self.loop()
-
-        ### free up memory from rendered objects
-        self.free_up_memory()
+        self.loop(callback = self.show_htsl_page_callback)
 
     def open_link(self, link_string):
 

@@ -17,6 +17,24 @@ from .constants import (
 ## custom services
 from .services import normal, record, play
 
+MODAL_LEVEL = 0
+def set_modal(is_modal):
+    global MODAL_LEVEL
+    if is_modal:
+        MODAL_LEVEL = MODAL_LEVEL + 1
+    elif MODAL_LEVEL > 0:
+        MODAL_LEVEL = MODAL_LEVEL - 1
+    return MODAL_LEVEL
+    
+def is_modal():
+    global MODAL_LEVEL
+    return (MODAL_LEVEL > 0)
+
+# FIXME: ugly hack to display
+# multi level modal dialog 
+def has_multi_modal(last_level):
+    global MODAL_LEVEL
+    return (MODAL_LEVEL > last_level)
 
 ### create a namespace to store the services in use
 SERVICES_NS = type("Object", (), {})()
