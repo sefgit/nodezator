@@ -514,6 +514,7 @@ class SessionRecordingForm(Object2D):
             self.filepath_to_load_label.set(str(current))
 
     async def set_session_recording_loop(self):
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -570,7 +571,6 @@ class SessionRecordingForm(Object2D):
         self.running = True
         self.loop_holder = self
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.set_session_recording_loop())
 
     def handle_input(self):

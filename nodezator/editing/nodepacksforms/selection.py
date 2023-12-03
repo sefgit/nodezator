@@ -6,6 +6,7 @@ import asyncio
 from pathlib import Path
 
 from functools import partial, partialmethod
+from operator import methodcaller
 
 
 ### third-party imports
@@ -32,7 +33,7 @@ from ...config import APP_REFS
 
 from ...translation import TRANSLATION_HOLDER as t
 
-from ...pygamesetup import SERVICES_NS, SCREEN_RECT, blit_on_screen, set_modal
+from ...pygamesetup import SERVICES_NS, SCREEN_RECT, blit_on_screen, set_modal, has_multi_modal
 
 from ...appinfo import NATIVE_FILE_EXTENSION
 
@@ -473,12 +474,13 @@ class NodePacksSelectionChangeForm(Object2D):
 
         draw_depth_finish(button_surf)
 
-        show_loading_nodes_page = partial(
-            open_htsl_link,
-            "nodezator://manual.nodezator.pysite/ch-loading-nodes.htsl",
-        )
+        #show_loading_nodes_page = partial(
+        #    open_htsl_link,
+        #    "nodezator://manual.nodezator.pysite/ch-loading-nodes.htsl",
+        #)
 
-        help_button = Button(button_surf, command=show_loading_nodes_page)
+        #help_button = Button(button_surf, command=show_loading_nodes_page)
+        help_button = Button(button_surf, command=self.show_help)
 
         help_button.rect.bottomleft = widgets.rect.bottomleft
 
@@ -515,18 +517,20 @@ class NodePacksSelectionChangeForm(Object2D):
         ### list each node pack
         self.add_node_packs(all_packs)
 
-    def add_local_node_packs(self):
-        """"""
-        ### select new paths;
-
-        paths = select_paths(
-            caption=("Select node to be added to file"),
-        )
-
+    def add_local_node_packs_callback(self, paths):
         if not paths:
             return
 
         self.add_node_packs(paths)
+
+    
+    def add_local_node_packs(self):
+        """"""
+        ### select new paths;
+        select_paths(
+            caption=("Select node to be added to file"),
+            callback = self.add_local_node_packs_callback,
+        )
 
     def add_installed_node_packs_from_entry(self):
 
@@ -540,7 +544,7 @@ class NodePacksSelectionChangeForm(Object2D):
         self.add_node_packs(new_installed_node_packs)
 
     def add_node_packs(self, node_packs):
-
+        
         ### make sure node_packs is a containter
 
         if not isinstance(node_packs, (list, tuple)):
@@ -621,6 +625,7 @@ class NodePacksSelectionChangeForm(Object2D):
                 y_diff = panel_rect.top - item.rect.top
                 npwl.rect.move_ip(0, y_diff)
 
+        
     def remove_item(self, item):
 
         ### reference node pack widget list locally
@@ -654,9 +659,11 @@ class NodePacksSelectionChangeForm(Object2D):
 
     async def present_change_node_packs_form_loop(self):
 
+        level = set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
-
+            if has_multi_modal(level):
+                continue;
             SERVICES_NS.frame_checkups()
 
             ### put the handle_input/update/draw method
@@ -710,7 +717,6 @@ class NodePacksSelectionChangeForm(Object2D):
         self.running = True
         self.loop_holder = self
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.present_change_node_packs_form_loop())
 
     def handle_input(self):
@@ -861,6 +867,18 @@ class NodePacksSelectionChangeForm(Object2D):
     scroll_up = partialmethod(scroll, 30)
     scroll_down = partialmethod(scroll, -30)
 
+    def show_help_callback(self):
+        self.draw = self._draw
+        
+    def show_help(self):
+        # ugly hack to display multi modal dialog
+        self._draw = self.draw
+        self.draw = partial(methodcaller('update_screen'), SERVICES_NS)        
+        open_htsl_link(
+            "nodezator://manual.nodezator.pysite/ch-loading-nodes.htsl",
+            callback = self.show_help_callback,
+        )
+    
     def apply_changes(self):
         """Treat data and, if valid, perform changes."""
         current_packs = set(

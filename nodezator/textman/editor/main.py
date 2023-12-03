@@ -352,6 +352,7 @@ class TextEditor(Object2D):
     async def edit_text_loop(self, cursor):
         ### loop until running attribute is set to False
         self.running = True
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)
             ### perform various checkups for this frame;
@@ -476,7 +477,6 @@ class TextEditor(Object2D):
         ### process validation command
         self.validation_command = validation_command
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.edit_text_loop(cursor))
 
     @property

@@ -188,6 +188,7 @@ class AudioPlayer(Object2D):
         )
 
     async def play_audio_loop(self):
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -237,7 +238,6 @@ class AudioPlayer(Object2D):
 
         loop_holder = self
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.play_audio_loop())
 
     def handle_input(self):

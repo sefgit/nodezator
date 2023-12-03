@@ -264,6 +264,7 @@ class PathForm(Object2D):
         self.running = False
 
     async def get_path_loop(self):
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -342,7 +343,6 @@ class PathForm(Object2D):
         self.running = True
         self.loop_holder = self
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.get_path_loop())
 
     def handle_input(self):

@@ -266,6 +266,20 @@ class NodePacksRenamingChangeForm(Object2D):
 
         self.widgets.extend((self.cancel_button, self.submit_button))
 
+    def choose_filepath_callback(self, paths):
+        ### if paths were given, a single one, should be
+        ### used as the new filepath;
+        ###
+        ### update the label using the given value
+
+        if paths:
+
+            self.chosen_filepath = paths[0]
+
+            self.chosen_filepath_label.set(str(self.chosen_filepath))
+
+            self.build_renaming_subform()
+    
     def choose_filepath(self, event):
         """Pick new path and update label using it.
 
@@ -282,20 +296,11 @@ class NodePacksRenamingChangeForm(Object2D):
         """
         ### pick new path
 
-        paths = select_paths(caption=FILE_MANAGER_CAPTION)
+        select_paths(
+            caption=FILE_MANAGER_CAPTION,
+            callback = self.choose_filepath_callback,
+        )
 
-        ### if paths were given, a single one, should be
-        ### used as the new filepath;
-        ###
-        ### update the label using the given value
-
-        if paths:
-
-            self.chosen_filepath = paths[0]
-
-            self.chosen_filepath_label.set(str(self.chosen_filepath))
-
-            self.build_renaming_subform()
 
     ### TODO build subform (two columns, where first has
     ### current names as labels and second has string
@@ -395,6 +400,7 @@ class NodePacksRenamingChangeForm(Object2D):
 
     async def present_rename_node_packs_form_loop(self):
 
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -443,7 +449,6 @@ class NodePacksRenamingChangeForm(Object2D):
         self.running = True
         self.loop_holder = self
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.present_rename_node_packs_form_loop())
 
     def handle_input(self):

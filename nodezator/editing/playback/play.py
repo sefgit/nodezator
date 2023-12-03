@@ -351,16 +351,20 @@ class SessionPlayingForm(Object2D):
         ## store
         widgets.extend((self.cancel_button, self.start_button))
 
-    def change_filepath(self):
-        """Pick new path and update label using it."""
-        ### pick new path
-        paths = select_paths(caption="Select session data file to play")
-
+    def change_filepath_callback(self, paths):
         ### if paths were given, there can only be one,
         ### it should be used as the new filepath
 
         if paths:
             self.filepath_label.set(str(paths[0]))
+    
+    def change_filepath(self):
+        """Pick new path and update label using it."""
+        ### pick new path
+        select_paths(
+            caption="Select session data file to play",
+            callback = self.change_filepath_callback,
+        )
 
     def check_speed_button_surfs(self):
         """Highlight/unhighlighted speed button surfaces.
@@ -381,6 +385,7 @@ class SessionPlayingForm(Object2D):
             button.image = SPEED_BUTTON_SURF_MAP[button][index]
 
     async def set_session_playing_loop(self):
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -436,7 +441,6 @@ class SessionPlayingForm(Object2D):
         self.running = True
         self.loop_holder = self
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.set_session_playing_loop())
 
 

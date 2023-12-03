@@ -72,7 +72,7 @@ logger = get_new_logger(__name__)
 all_rects = None
 all_rectsman = None
 
-def do_export_as_image():
+def do_export_as_image(settings):
     global all_rects
     global all_rectsman
     

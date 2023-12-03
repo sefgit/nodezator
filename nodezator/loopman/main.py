@@ -11,7 +11,7 @@ from pygame.locals import QUIT
 
 ### local imports
 
-from ..pygamesetup import SERVICES_NS, set_modal
+from ..pygamesetup import SERVICES_NS, set_modal, has_multi_modal
 
 from .exception import (
     ContinueLoopException,
@@ -27,11 +27,13 @@ class LoopHolder:
         loop_holder = self
 
         ### set a running flag and start the loop
-
         self.running = True
 
+        level = set_modal(True)
         while self.running:
             await asyncio.sleep(0)            
+            if has_multi_modal(level):
+                continue;
             ### perform various checkups for this frame;
             ###
             ### stuff like maintaing a constant framerate and more
@@ -98,7 +100,6 @@ class LoopHolder:
         except AttributeError:
             self.draw = partial(methodcaller('update_screen'), SERVICES_NS)
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.async_loop(callback))
 
 

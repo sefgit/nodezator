@@ -55,12 +55,14 @@ from ..classes2d.single import Object2D
 
 class FileManagerOperations(Object2D):
     """Operations for file manager class."""
-    async def _run(self, loop_holder):
+    async def select_paths_loop(self):
 
         ### keep looping the execution the methods
         ### "handle_input", "update" and "drawing" of the
         ### loop holder until running is set to False
 
+        set_modal(True)
+        loop_holder = self
         self.running = True
 
         while self.running:
@@ -149,10 +151,7 @@ class FileManagerOperations(Object2D):
         self.selection_entry.set(path_name)
         
         ### alias self as the loop holder
-        loop_holder = self
-        
-        set_modal(True)
-        asyncio.get_running_loop().create_task(self._run(loop_holder))
+        asyncio.get_running_loop().create_task(self.select_paths_loop())
 
     def handle_input(self):
         """Handle event queue."""

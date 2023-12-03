@@ -293,6 +293,7 @@ class WidgetPicker(Object2D, SubformCreation):
         self.submit_button.rect.topleft = self.cancel_button.rect.move(10, 0).topright
 
     async def pick_widget_loop(self):
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -340,7 +341,7 @@ class WidgetPicker(Object2D, SubformCreation):
         ## to be referenced in an attribute here, but can
         ## be in a local variable, so make the change;
         self.loop_holder = self
-        set_modal(True)
+
         asyncio.get_running_loop().create_task(self.pick_widget_loop())
 
     def handle_input(self):

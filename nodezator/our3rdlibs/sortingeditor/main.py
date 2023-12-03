@@ -317,6 +317,7 @@ class SortingEditor(SortingEditorModes):
     shuffle_items = partialmethod(sort_items, shuffle)
 
     async def sort_sequence_loop(self):
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -374,7 +375,6 @@ class SortingEditor(SortingEditorModes):
         self.running = True
 
         ### start the widget loop
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.sort_sequence_loop())
 
     def prepare_objs(self, sorted_items, available_items):

@@ -138,6 +138,7 @@ class VideoPreviewer(Object2D):
             self.not_available_message_obj.rect.center = SCREEN_RECT.center
 
     async def preview_videos_loop(self):
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -177,7 +178,6 @@ class VideoPreviewer(Object2D):
 
         loop_holder = self
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.preview_videos_loop())
 
     def handle_input(self):

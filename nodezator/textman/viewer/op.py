@@ -87,6 +87,7 @@ class Operations(Object2D):
 
         self.running = True
 
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -123,7 +124,6 @@ class Operations(Object2D):
         set_modal(False)
 
     def run(self):
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.run_loop())
         
     def handle_events(self):

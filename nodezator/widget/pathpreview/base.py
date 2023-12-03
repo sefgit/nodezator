@@ -376,14 +376,7 @@ class _BasePreview(Object2D):
 
         return entry.rect.collidepoint(pos)
 
-    def select_new_paths(self):
-        """Select new path(s) from the file manager.
-
-        If no path is returned, the widget isn't updated.
-        """
-        ### retrieve path(s) from file browser
-        paths = select_paths(caption="Select path(s)")
-
+    def select_new_paths_callback(self, paths):
         ### if no paths are selected, return
         if not paths:
             return
@@ -397,6 +390,17 @@ class _BasePreview(Object2D):
 
         else:
             self.set(paths)
+    
+    def select_new_paths(self):
+        """Select new path(s) from the file manager.
+
+        If no path is returned, the widget isn't updated.
+        """
+        ### retrieve path(s) from file browser
+        select_paths(
+            caption="Select path(s)",
+            callback = self.select_new_paths_callback,
+        )
 
     def update_previewed_path_from_entry(self):
         """"""

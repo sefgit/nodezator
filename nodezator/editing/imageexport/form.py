@@ -27,7 +27,7 @@ from ...config import APP_REFS
 
 from ...translation import TRANSLATION_HOLDER as t
 
-from ...pygamesetup import SERVICES_NS, SCREEN_RECT, blit_on_screen, set_modal
+from ...pygamesetup import SERVICES_NS, SCREEN_RECT, blit_on_screen, set_modal, has_multi_modal
 
 from ...dialog import create_and_show_dialog
 
@@ -54,6 +54,11 @@ from ...surfsman.cache import UNHIGHLIGHT_SURF_MAP
 
 from ...surfsman.draw import draw_border, draw_depth_finish
 from ...surfsman.render import render_rect
+from ...surfsman.cache import (
+    UNHIGHLIGHT_SURF_MAP,
+    cache_screen_state,
+    draw_cached_screen_state,
+)
 
 from ...loopman.exception import (
     QuitAppException,
@@ -433,11 +438,7 @@ class ImageExportForm(Object2D):
 
         self.widgets.extend((self.cancel_button, self.submit_button))
 
-    def change_filepath(self):
-        """Pick new path and update label using it."""
-        ### pick new path
-
-        paths = select_paths(caption=NEW_IMAGEPATH_CAPTION, path_name=DEFAULT_FILENAME)
+    def change_filepath_callback(self, paths):
 
         ### if paths were given, there can only be one,
         ### it should be used as the new filepath
@@ -447,6 +448,16 @@ class ImageExportForm(Object2D):
             self.set_new_filepath(new_filepath)
 
         ###
+    
+    def change_filepath(self):
+        """Pick new path and update label using it."""
+        ### pick new path
+
+        select_paths(
+            caption=NEW_IMAGEPATH_CAPTION, 
+            path_name=DEFAULT_FILENAME,
+            callback = self.change_filepath_callback,
+        )
 
     def set_new_filepath(self, filepath):
 
@@ -503,8 +514,12 @@ class ImageExportForm(Object2D):
 
     async def get_image_exporting_settings_loop(self):
     
+        self.running = True
+        level = set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
+            if has_multi_modal(level):
+                continue;
 
             ### perform various checkups for this frame;
             ###
@@ -532,7 +547,8 @@ class ImageExportForm(Object2D):
                 self.loop_holder = err.loop_holder
 
         ### remove the size label
-        self.widgets.remove(size_label)
+        self.widgets.remove(self.size_label)
+        self.size_label = None
 
         ### blit the rect sized semitransparent obj
         ### on the screen so the form appear as if
@@ -549,6 +565,7 @@ class ImageExportForm(Object2D):
         """Return settings to export an image."""
         ### set form data to None
         self.form_data = None
+        self.size_label = None
 
         ### store size
         self.size = size
@@ -558,6 +575,9 @@ class ImageExportForm(Object2D):
         ### unhighlighted
 
         blit_on_screen(UNHIGHLIGHT_SURF_MAP[SCREEN_RECT.size], (0, 0))
+
+        ### update the copy of the screen as it is now
+        cache_screen_state()
 
         ### create and store a label informing the image
         ### size to the user
@@ -576,10 +596,9 @@ class ImageExportForm(Object2D):
 
         ### loop until running attribute is set to False
 
-        self.running = True
         self.loop_holder = self
+        self.size_label = size_label
         
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.get_image_exporting_settings_loop())
        
         
@@ -718,6 +737,8 @@ class ImageExportForm(Object2D):
 
         Extends Object2D.draw.
         """
+        ### draw a cached copy of the screen over itself
+        draw_cached_screen_state()
         ### draw self (background)
         super().draw()
 

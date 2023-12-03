@@ -32,8 +32,48 @@ NEW_PYTHON_FILEPATH_CAPTION = (t.editing.python_exporting.pick_new_path) + " (.p
 
 
 ### main functions
+exported_python_code = None
+
+def export_as_python_callback(paths):
+    global exported_python_code
+    
+    ### act according to whether paths were given
+
+    ## if paths were given, there can only be one,
+    ## it should be used as the new filepath
+
+    if paths:
+        filepath = paths[0]
+
+    ## if no path is given, we return earlier, since
+    ## it means the user cancelled setting a new
+    ## path
+    else:
+        return
+
+    ### if the extension is not allowed, notify the
+    ### user and cancel the operation by returning
+
+    if filepath.suffix.lower() != ".py":
+
+        exported_python_code = None
+        create_and_show_dialog("File extension must be '.py'")
+        return
+
+    ### otherwise, save the exported code in the given path
+
+    with open(filepath, mode="w", encoding="utf-8") as f:
+        f.write(exported_python_code)
+
+    exported_python_code = None
+    ### set status message informing user
+
+    message = f"File succesfully exported as python script in {filepath}"
+    set_status_message(message)
+
 
 def export_as_python():
+    global exported_python_code
 
     exported_python_code = get_exported_python_code()
 
@@ -41,42 +81,11 @@ def export_as_python():
 
         ### grab filepath
 
-        paths = select_paths(
+        select_paths(
             caption=NEW_PYTHON_FILEPATH_CAPTION,
             path_name=DEFAULT_FILENAME,
+            callback = export_as_python_callback,
         )
-
-        ### act according to whether paths were given
-
-        ## if paths were given, there can only be one,
-        ## it should be used as the new filepath
-
-        if paths:
-            filepath = paths[0]
-
-        ## if no path is given, we return earlier, since
-        ## it means the user cancelled setting a new
-        ## path
-        else:
-            return
-
-        ### if the extension is not allowed, notify the
-        ### user and cancel the operation by returning
-
-        if filepath.suffix.lower() != ".py":
-
-            create_and_show_dialog("File extension must be '.py'")
-            return
-
-        ### otherwise, save the exported code in the given path
-
-        with open(filepath, mode="w", encoding="utf-8") as f:
-            f.write(exported_python_code)
-
-        ### set status message informing user
-
-        message = f"File succesfully exported as python script in {filepath}"
-        set_status_message(message)
 
 
 def view_as_python():

@@ -93,6 +93,7 @@ class ImagesPreviewer(PreviewerOperations):
             APP_REFS.draw_after_window_resize_setups = self.response_draw
 
     async def preview_images_loop(self):
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -133,7 +134,6 @@ class ImagesPreviewer(PreviewerOperations):
 
         self.running = True
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.preview_images_loop())
 
     def create_image_surfaces(self):

@@ -355,6 +355,7 @@ class DemonstrationSessionForm(Object2D):
 
     async def set_demonstration_session_loop(self):
 
+        set_modal(True)
         while self.running:
             await asyncio.sleep(0)        
 
@@ -425,7 +426,6 @@ class DemonstrationSessionForm(Object2D):
         self.running = True
         self.loop_holder = self
 
-        set_modal(True)
         asyncio.get_running_loop().create_task(self.set_demonstration_session_loop())
 
     def handle_input(self):
